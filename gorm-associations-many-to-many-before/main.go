@@ -11,6 +11,8 @@ import (
 	"gorm.io/gorm/logger"
 )
 
+// CREATE TABLES WITH THE FOLLOWING DETAILS: Movies, Actors, Filmography
+
 /* Sample Data:
    <Movie>: 					<List of Actors>
    "Iron Man": 					Robert Downey Jr.
@@ -62,4 +64,35 @@ func connectDatabase() {
 	}
 
 	DB = database
+}
+
+func dbMigrate() {
+	DB.AutoMigrate(&Movie{}, &Actor{}, &Filmography{})
+}
+
+func main() {
+	connectDatabase()
+	dbMigrate()
+
+	var movie Movie
+	DB.Where("name = ?", "Avengers Infinity War").First(&movie)
+	fmt.Printf("Movie: %s\n\n", movie.Name)
+
+	var filmography []Filmography
+	DB.Where("movie_id = ?", movie.ID).Find(&filmography)
+	fmt.Printf("Filmography count: %v\n\n", len(filmography))
+
+	var actor_ids []int
+	for _, element := range filmography {
+		actor_ids = append(actor_ids, element.ActorID)
+	}
+	fmt.Printf("Actor IDs: %v\n\n", actor_ids)
+
+	var actors []Actor
+	DB.Where("id IN ?", actor_ids).Find(&actors)
+	fmt.Println("Actors:")
+	for _, actor := range actors {
+		fmt.Printf("%s\n", actor.Name)
+	}
+
 }
