@@ -26,22 +26,14 @@ import (
 
 type Movie struct {
 	gorm.Model
-	Name string
+	Name   string
+	Actors []Actor `gorm:"many2many:filmography;"`
 }
 
 type Actor struct {
 	gorm.Model
-	Name string
-}
-
-type Filmography struct {
-	gorm.Model
-	MovieID int
-	ActorID int
-}
-
-func (Filmography) TableName() string {
-	return "filmography"
+	Name   string
+	Movies []Movie `gorm:"many2many:filmography;"`
 }
 
 var DB *gorm.DB
@@ -67,7 +59,7 @@ func connectDatabase() {
 }
 
 func dbMigrate() {
-	DB.AutoMigrate(&Movie{}, &Actor{}, &Filmography{})
+	DB.AutoMigrate(&Movie{}, &Actor{})
 }
 
 func main() {
