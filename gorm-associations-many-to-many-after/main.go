@@ -32,7 +32,8 @@ type Movie struct {
 
 type Actor struct {
 	gorm.Model
-	Name string
+	Name   string
+	Movies []Movie `gorm:"many2many:filmography;"` // added in order to enable one be able to specify the movies an actor has acted in
 }
 
 var DB *gorm.DB
@@ -72,6 +73,17 @@ func main() {
 	fmt.Println("Actors:")
 	for _, actor := range movie.Actors {
 		fmt.Printf("%s\n", actor.Name)
+	}
+
+	// similarly if we are to get all the movies that Robert Downey Jr. has acted in
+	var actor Actor
+	DB.Where("name = ?", "Robert Downey Jr.").Preload("Movies").First(&actor)
+	fmt.Println("Actor: " + actor.Name)
+
+	fmt.Printf("Movies:")
+
+	for _, element := range actor.Movies {
+		fmt.Printf("%v\n", element.Name)
 	}
 
 }
